@@ -1,41 +1,119 @@
 #include "Program1.h"
 
-using namespace std;
+using namespace std; 
 
-vector<vector<Card>> create_subarrays(vector<Card> items, vector<Card> current, vector<vector<Card>> subarrays, int pos, int size)
+Card::Card(string n, int m, int c)
 {
-	if (size == items.size()) return subarrays;
-	else 
+	name = n;
+	mPrice = m;
+	cost = c;
+}
+
+void get_combinations(vector<Card> items, vector<vector<Card>>& combinations, vector<Card> current, int pos)
+{
+	if (pos < items.size())
 	{
-		if (pos < size)
-		{
-			vector<Card> temp = current;
-			temp.push_back(items[pos]);
-			subarrays.push_back(temp);
-			return create_subarrays(items, current, subarrays, pos + 1, size);
-			return create_subarrays(items, temp, subarrays, pos + 1, size + 1);
-		}
+		get_combinations(items, combinations, current, pos + 1);
+		current.push_back(items[pos]);
+		combinations.push_back(current);
+		get_combinations(items, combinations, current, pos + 1);
+	}
+	else
+	{
+		return;
 	}
 }
 
-int main(int argc, char** argv)
+int sum_of_weights(vector<Card> items)
 {
-	/*
-	vector<vector<Card>> subarray;
-	vector<Card> items, current;
-	Card c1("a", 1, 1);
-	Card c2("b", 2, 2);
-	Card c3("c", 3, 3);
-
-	subarray = create_subarrays(items, current, subarray, 1, 0);
-	for (int i = 0; i < subarray.size(); i++)
+	int ret = 0;
+	for (int i = 0; i < items.size(); i++)
 	{
-		for (int j = 0; j < subarray[i].size(); j++)
+		ret += items[i].cost;
+	}
+	return ret;
+}
+
+int profit(vector<Card> items)
+{
+	int ret = 0;
+	for (int i = 0; i < items.size(); i++)
+	{
+		ret += (items[i].mPrice - items[i].cost);
+	}
+	return ret;
+}
+vector<Card> computeMaxProfit(vector<Card> items, int money)
+{
+	int max_profit = 0;
+	vector<Card> current_set, max_set, temp;
+	vector<vector<Card>> all_sets;
+	get_combinations(items, all_sets, temp, 0);
+	if (sum_of_weights(items) <= money)
+	{
+		return items;
+	}
+	for (int i = 0; i < all_sets.size(); i++)
+	{
+		if (sum_of_weights(all_sets[i]) <= money)
 		{
-			cout << subarray[i][j].name << endl;
+			if (profit(all_sets[i]) > max_profit)
+			{
+				max_profit = profit(all_sets[i]);
+				max_set = all_sets[i];
+			}
 		}
 	}
-	*/
+	return max_set;
+}
 
+int main (int argc, char** argv)
+{
+	clock_t start = clock();
+	cout << start << endl;
+	double duration;
+	ifstream inputfile;
+	inputfile.open(argv[2]);
+	int num_market_cards, market_price, num_gertrude_cards, gertrude_price, money;
+	string market_card_name, gertrude_card_name;
+	vector<Card> market_cards, gertrude_cards, cards;
+	inputfile >> num_market_cards;
+	ofstream outfile("output.txt", ofstream::out);
+	for (int i = 0; i < num_market_cards; i++)
+	{
+		inputfile >> market_card_name >> market_price;
+		market_cards.push_back(Card(market_card_name, market_price, -1));
+	}
+	inputfile.close();
+	inputfile.open(argv[4]);
+	while (inputfile >> num_gertrude_cards >> money)
+	{
+		for (int i = 0; i < num_gertrude_cards; i++)
+		{
+			bool found = false;
+			inputfile >> gertrude_card_name >> gertrude_price;
+			for (int j = 0; j < num_market_cards; j++)
+			{
+				if (gertrude_card_name == market_cards[j].name)
+				{
+					gertrude_cards.push_back(Card(market_cards[j].name, market_cards[j].mPrice, gertrude_price));
+					found = true;
+				}
+			}
+			if (found == false)
+			{
+				cout << "Card not found. Exiting program" << endl;
+				break;
+			}
+		}
+		if (gertrude_cards.size() < num_gertrude_cards) break;
+		duration = (clock() - start)/(double) (CLOCKS_PER_SEC/1000);
+		outfile << num_gertrude_cards << "\n" << profit(computeMaxProfit(gertrude_cards, money)) << "\n"
+		<< computeMaxProfit(gertrude_cards, money).size() << "\n" << duration << "\n\n";
+		gertrude_cards.clear();
+	}
+
+	inputfile.close();
+	outfile.close();
 	return 0;
 }

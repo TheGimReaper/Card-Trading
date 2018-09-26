@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string.h>
 #include <vector>
+#include <fstream>
+#include <ctime>
 
 class Card
 {

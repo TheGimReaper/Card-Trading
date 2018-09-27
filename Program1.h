@@ -6,6 +6,8 @@
 #include <vector>
 #include <fstream>
 #include <ctime>
+#include <unistd.h>
+#include <cstdio>
 
 class Card
 {

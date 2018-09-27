@@ -43,6 +43,7 @@ int profit(vector<Card> items)
 	}
 	return ret;
 }
+
 vector<Card> computeMaxProfit(vector<Card> items, int money)
 {
 	int max_profit = 0;
@@ -69,9 +70,6 @@ vector<Card> computeMaxProfit(vector<Card> items, int money)
 
 int main (int argc, char** argv)
 {
-	clock_t start = clock();
-	cout << start << endl;
-	double duration;
 	ifstream inputfile;
 	inputfile.open(argv[2]);
 	int num_market_cards, market_price, num_gertrude_cards, gertrude_price, money;
@@ -88,6 +86,9 @@ int main (int argc, char** argv)
 	inputfile.open(argv[4]);
 	while (inputfile >> num_gertrude_cards >> money)
 	{
+		clock_t start, end;
+		start = clock();
+		double duration;
 		for (int i = 0; i < num_gertrude_cards; i++)
 		{
 			bool found = false;
@@ -107,12 +108,14 @@ int main (int argc, char** argv)
 			}
 		}
 		if (gertrude_cards.size() < num_gertrude_cards) break;
-		duration = (clock() - start)/(double) (CLOCKS_PER_SEC/1000);
-		outfile << num_gertrude_cards << "\n" << profit(computeMaxProfit(gertrude_cards, money)) << "\n"
-		<< computeMaxProfit(gertrude_cards, money).size() << "\n" << duration << "\n\n";
+		outfile << num_gertrude_cards << " " << profit(computeMaxProfit(gertrude_cards, money)) << " "
+		<< computeMaxProfit(gertrude_cards, money).size();
+		end = clock();
+		duration =  ((end - start)/(double) (CLOCKS_PER_SEC));
+		outfile << " " << duration << "\n";
 		gertrude_cards.clear();
 	}
-
+		
 	inputfile.close();
 	outfile.close();
 	return 0;
